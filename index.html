@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Background Remover</title>
+  <style>
+    #container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 50px;
+    }
+    
+    #image-preview {
+      width: 400px;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Background Remover</h1>
+    <input type="file" id="image-upload" accept="image/*">
+    <button onclick="removeBackground()">Remove Background</button>
+    <div id="result-container">
+      <h2>Result</h2>
+      <img id="image-preview" src="" alt="Result">
+    </div>
+  </div>
+
+  <script>
+    let imageUpload = document.getElementById('image-upload');
+    let imagePreview = document.getElementById('image-preview');
+
+    imageUpload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function (event) {
+        const imageUrl = event.target.result;
+        imagePreview.src = imageUrl;
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    function removeBackground() {
+      const imageUrl = imagePreview.src;
+
+      // DeepAI API endpoint for background removal
+      const endpoint = 'https://api.deepai.org/api/remove_background';
+
+      // Replace with your DeepAI API key
+      const apiKey = 'api-key:23d34a34-07ab-4510-8ac8-9c97ec8004aa';
+
+      const formData = new FormData();
+      formData.append('image', imageUpload.files[0]);
+
+      fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'api-key': apiKey
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.output_url) {
+          imagePreview.src = result.output_url;
+        } else if (result.error) {
+          console.error('Error:', result.error);
+        } else {
+          console.error('Background removal failed. Please try again.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+  </script>
+</body>
+</html>
